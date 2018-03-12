@@ -3,7 +3,6 @@ package main
 import "os"
 import "fmt"
 import "flag"
-import "encoding/xml"
 
 func check(e error) {
     if e != nil {
@@ -12,20 +11,23 @@ func check(e error) {
 }
 
 func main() {
-    args := os.Args[1:]
-    
-    if len(args) < 1 {
-    	fmt.Printf("Usage: gpx [-o outputFileName] inputFileName\n")
-        os.Exit(10)
-    }
+    var inputFile *os.File
+    var err error
+    var inputFileName string
+
+    outputFileName := flag.String("o", "", "Output file name. Default: stdout")
+    flag.Parse()
+
+    fmt.Printf("param len %d\n", len(flag.Args()))
 
     if len(flag.Args()) > 0 {
     	inputFileName = flag.Args()[0]
-    	inputFile, err := os.Open(inputFileName)
+    	inputFile, err = os.Open(inputFileName)
     	check(err)
     } else {
     	inputFile = os.Stdin
+    	inputFileName = ""
     }
 
-    res := readAndProcess(inputFile)
+    process(*inputFile, *outputFileName, inputFileName)
 }
