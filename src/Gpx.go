@@ -1,7 +1,6 @@
-import "encoding/xml"
+package main
 
 type Gpx struct {
-	XMLName xml.Name `xml:gpx"`
 	xsd string `xml:"xmlns:xsd,attr"`
 	xsi string `xml:"xmlns:xsi,attr"`
 	version string `xml:"version,attr"`

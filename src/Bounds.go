@@ -1,4 +1,4 @@
-import "encoding/xml"
+package main
 
 type Bounds struct {
 	minlat string `xml:"minlat,attr"`

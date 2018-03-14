@@ -1,4 +1,4 @@
-import "encoding/xml"
+package main
 
 type Description struct {
 	html string `xml:"html,attr"`

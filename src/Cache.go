@@ -1,4 +1,4 @@
-import "encoding/xml"
+package main
 
 type Cache struct {
 	id string `xml:"id,attr"`
@@ -9,7 +9,7 @@ type Cache struct {
 	name string `xml:"groundspeak:name"`
 	placed_by string `xml:"groundspeak:placed_by"`
 	owner string `xml:"groundspeak:owner"`
-	type string `xml:"groundspeak:type"`
+	cacheType string `xml:"groundspeak:type"`
 	container string `xml:"groundspeak:container"`
 	attributes []Attribute `xml:"groundspeak:attributes"`
 	difficulty string `xml:"groundspeak:difficulty"`

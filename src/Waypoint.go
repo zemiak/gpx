@@ -1,4 +1,4 @@
-import "encoding/xml"
+package main
 
 type Waypoint struct {
 	time string
@@ -7,6 +7,6 @@ type Waypoint struct {
 	url string
 	urlname string
 	sym string
-	type string
+	wpType string `xml:"type"`
 	cache Cache `xml:"groundspeak:cache"`
 }

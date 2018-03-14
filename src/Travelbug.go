@@ -1,4 +1,4 @@
-import "encoding/xml"
+package main
 
 type Travelbug struct {
 	id string `xml:"id,attr"`

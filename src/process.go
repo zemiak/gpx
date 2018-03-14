@@ -1,48 +1,46 @@
 package main
 
 import (
-	"bytes"
-	"encoding/xml"
+	"os"
 	"fmt"
+	"encoding/xml"
+	"io"
 )
 
-type Node struct {
-	XMLName xml.Name
-	Attrs   []xml.Attr `xml:"-"`
-	Content []byte     `xml:",innerxml"`
-	Nodes   []Node     `xml:",any"`
+func readFile(file os.File) []byte {
+	var content []byte
+	buf := make([]byte, 32*1024) // define your buffer size here.
+
+    for {
+        n, err := file.Read(buf)
+
+        if n > 0 {
+        	chunk := buf[:n]
+        	append(content, chunk...)
+        }
+
+        if err == io.EOF {
+            break
+        }
+
+        if err != nil {
+            fmt.Printf("read %d bytes: %v", n, err)
+            panic(err)
+        }
+    }
+
+    return content
 }
 
-func (n *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	n.Attrs = start.Attr
-	type node Node
+func process(inputFile os.File, outputFileName string, inputFileName string) {
+	content := readFile(inputFile)
 
-	return d.DecodeElement((*node)(n), &start)
-}
-
-func walkit(inputFile os.File, outputFileName string, inputFileName string) {
-	buf := bytes.NewBuffer(data)
-	dec := xml.NewDecoder(buf)
-
-	var n Node
-	err := dec.Decode(&n)
-	if err != nil {
-		panic(err)
+	var gpx Gpx
+	e := xml.Unmarshal(content, &gpx)
+	if e != nil {
+		fmt.Printf("Error parsing XML")
+		panic(e)
 	}
 
-	walk([]Node{n}, func(n Node) bool {
-		if n.XMLName.Local == "p" {
-			fmt.Println(string(n.Content))
-			fmt.Println(n.Attrs)
-		}
-		return true
-	})
-}
-
-func walk(nodes []Node, f func(Node) bool) {
-	for _, n := range nodes {
-		if f(n) {
-			walk(n.Nodes, f)
-		}
-	}
+	fmt.Printf("%#v\n", gpx.name)
 }

@@ -1,4 +1,4 @@
-import "encoding/xml"
+package main
 
 type Attribute struct {
 	desc string `xml:",content"`

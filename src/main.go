@@ -1,7 +1,6 @@
 package main
 
 import "os"
-import "fmt"
 import "flag"
 
 func check(e error) {
@@ -18,11 +17,10 @@ func main() {
     outputFileName := flag.String("o", "", "Output file name. Default: stdout")
     flag.Parse()
 
-    fmt.Printf("param len %d\n", len(flag.Args()))
-
     if len(flag.Args()) > 0 {
     	inputFileName = flag.Args()[0]
     	inputFile, err = os.Open(inputFileName)
+        defer inputFile.Close()
     	check(err)
     } else {
     	inputFile = os.Stdin
