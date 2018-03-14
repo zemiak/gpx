@@ -16,7 +16,7 @@ func readFile(file os.File) []byte {
 
         if n > 0 {
         	chunk := buf[:n]
-        	append(content, chunk...)
+        	content = append(content, chunk...)
         }
 
         if err == io.EOF {
@@ -42,5 +42,5 @@ func process(inputFile os.File, outputFileName string, inputFileName string) {
 		panic(e)
 	}
 
-	fmt.Printf("%#v\n", gpx.name)
+	fmt.Printf("name %#v\n", gpx.name)
 }
