@@ -32,15 +32,21 @@ func readFile(file os.File) []byte {
     return content
 }
 
-func process(inputFile os.File, outputFileName string, inputFileName string) {
+func process(inputFile os.File) []byte {
 	content := readFile(inputFile)
 
 	var gpx Gpx
 	e := xml.Unmarshal(content, &gpx)
 	if e != nil {
-		fmt.Printf("Error parsing XML")
+		fmt.Printf("Error parsing XML\n")
 		panic(e)
 	}
 
-	fmt.Printf("name %#v\n", gpx.name)
+	output, oerr := xml.MarshalIndent(gpx, "  ", "    ")
+    if oerr != nil {
+        fmt.Printf("XML Marshaling Error\n")
+        panic(oerr)
+    }
+
+    return output
 }

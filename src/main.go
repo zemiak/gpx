@@ -11,6 +11,7 @@ func check(e error) {
 
 func main() {
     var inputFile *os.File
+    var outputFile *os.File
     var err error
     var inputFileName string
 
@@ -27,5 +28,14 @@ func main() {
     	inputFileName = ""
     }
 
-    process(*inputFile, *outputFileName, inputFileName)
+    transformed := process(*inputFile)
+
+    if *outputFileName == "" {
+        outputFile = os.Stdout
+    } else {
+        outputFile, err = os.Open(inputFileName)
+        defer outputFile.Close()
+    }
+
+    outputFile.Write(transformed)
 }

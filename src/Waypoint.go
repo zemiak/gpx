@@ -1,12 +1,15 @@
 package main
 
 type Waypoint struct {
-	time string
-	name string
-	desc string
-	url string
-	urlname string
-	sym string
-	wpType string `xml:"type"`
-	cache Cache `xml:"groundspeak:cache"`
+	Lat string `xml:"lat,attr"`
+	Lon string `xml:"lon,attr"`
+
+	Time string `xml:"time"`
+	Name string `xml:"name"`
+	Desc string `xml:"desc"`
+	Url string `xml:"url"`
+	UrlName string `xml:"urlname"`
+	Sym string `xml:"sym"`
+	WpType string `xml:"type"`
+	Cache GeoCache `xml:"groundspeak:cache"`
 }

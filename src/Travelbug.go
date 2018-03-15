@@ -1,7 +1,7 @@
 package main
 
 type Travelbug struct {
-	id string `xml:"id,attr"`
-	ref string `xml:"ref,attr"`
-	name string `xml:"groundspeak:name"`
+	Id string `xml:"id,attr"`
+	Ref string `xml:"ref,attr"`
+	Name string `xml:"groundspeak:name"`
 }

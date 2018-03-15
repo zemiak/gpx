@@ -4,9 +4,9 @@ import "encoding/xml"
 
 type Log struct {
 	XMLName xml.Name `xml:groundspeak:log"`
-	id string `xml:"id,attr"`
-	date string `xml:"groundspeak:date"`
-	logType string `xml:"groundspeak:type"`
-	finder string `xml:"groundspeak:finder"`
-	text string `xml:"groundspeak:text"`
+	Id string `xml:"id,attr"`
+	Date string `xml:"groundspeak:date"`
+	LogType string `xml:"groundspeak:type"`
+	Finder string `xml:"groundspeak:finder"`
+	Text string `xml:"groundspeak:text"`
 }

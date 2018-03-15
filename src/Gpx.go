@@ -1,19 +1,19 @@
 package main
 
 type Gpx struct {
-	xsd string `xml:"xmlns:xsd,attr"`
-	xsi string `xml:"xmlns:xsi,attr"`
-	version string `xml:"version,attr"`
-	creator string `xml:"creator,attr"`
-	schemaLocation string `xml:"xsi:schemaLocation,attr"`
-	xmlns string `xml:"xmlns,attr"`
+	Xsd string `xml:"xmlns:xsd,attr"`
+	Xsi string `xml:"xmlns:xsi,attr"`
+	Version string `xml:"version,attr"`
+	Creator string `xml:"creator,attr"`
+	SchemaLocation string `xml:"xsi:schemaLocation,attr"`
+	Xmlns string `xml:"xmlns,attr"`
 
-	name string
-	desc string
-	author string
-	email string
-	time string
-	keywords string
-	bounds Bounds `xml:"bounds"`
-	wpt []Waypoint `xml:"wpt"`
+	Name string `xml:"name"`
+	Desc string `xml:"desc"`
+	Author string `xml:"author"`
+	Email string `xml:"email"`
+	Time string `xml:"time"`
+	Keywords string `xml:"keywords"`
+	Bounds CoordinateBounds `xml:"bounds"`
+	Wpt []Waypoint `xml:"wpt"`
 }

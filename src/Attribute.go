@@ -1,7 +1,7 @@
 package main
 
 type Attribute struct {
-	desc string `xml:",content"`
-	id string `xml:"id,attr"`
-	inc string `xml:"inc,attr"`
+	Desc string `xml:",content"`
+	Id string `xml:"id,attr"`
+	Inc string `xml:"inc,attr"`
 }
