@@ -1,10 +1,17 @@
 package com.zemiak.gpx;
 
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import static java.lang.System.out;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class Processor {
     public void process(Document dom) {
@@ -17,24 +24,36 @@ public class Processor {
             throw new IllegalStateException("Document is not a GPX file");
         }
 
-        NodeList waypoints = gpx.getChildNodes();
-        for (int i = 0; i < waypoints.getLength() ; i++) {
-            Node wpt = waypoints.item(i);
-
-            if ("wpt".equalsIgnoreCase(wpt.getNodeName())) {
-                processWaypoint(wpt);
-            }
-        }
+        NodeFinder.findNodes(gpx.getChildNodes(), "wpt").forEach(wpt -> processWaypoint(wpt));
 
         print(dom);
     }
 
     private void processWaypoint(Node wpt) {
-        Node cache = findNode(wpt.getChildNodes(), "groundspeak:cache");
+        Node cache = NodeFinder.findNode(wpt.getChildNodes(), "groundspeak:cache");
         boolean archived = "True".equalsIgnoreCase(cache.getAttributes().getNamedItem("archived").getNodeValue());
         boolean disabled = "False".equalsIgnoreCase(cache.getAttributes().getNamedItem("available").getNodeValue());
 
-        Node attributes = findNode(cache.getChildNodes(), "groundspeak:attributes");
+        updateNameIfNeeded(wpt, archived, disabled);
+
+        String attrs = collectAttributes(cache);
+        String hint = getHint(cache);
+
+        Node attrLog = LogCreator.createLog(attrs);
+        Node hintLog = LogCreator.createLog(hint);
+
+        LogCreator.insertFirstLog(hintLog);
+        LogCreator.insertFirstLog(attrLog);
+    }
+
+    private String getHint(Node cache) throws DOMException {
+        Node hint = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:encoded_hints");
+        String hintText = (null == hint) ? "<none>" : hint.getNodeValue();
+        return hintText;
+    }
+
+    private String collectAttributes(Node cache) throws DOMException {
+        Node attributes = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:attributes");
         List<String> attrs = new ArrayList<>();
         for (int i = 0; i < attributes.getChildNodes().getLength(); i++) {
             Node attr = attributes.getChildNodes().item(i);
@@ -43,21 +62,53 @@ public class Processor {
 
             attrs.add((attrIncluded ? "Yes:" : "NO:") + attrText);
         }
+
+        return attrs.stream().collect(Collectors.joining("\n"));
     }
 
-    private void print(Document dom) {
+    private void updateNameIfNeeded(Node wpt, boolean archived, boolean disabled) {
+        Node name = NodeFinder.findNode(wpt.getChildNodes(), "urlname");
+        String text = name.getNodeValue();
+        boolean changed = false;
 
-    }
-
-    private Node findNode(NodeList nodes, String name) {
-        for (int i = 0; i < nodes.getLength() ; i++) {
-            Node n = nodes.item(i);
-
-            if (name.equalsIgnoreCase(n.getNodeName())) {
-                return n;
-            }
+        if (archived) {
+            text = "[A] " + text;
+            changed = true;
         }
 
-        throw new IllegalStateException("Node " + name + " not found in " + nodes.getLength() + " nodes");
+        if (disabled) {
+            text = "[D] " + text;
+            changed = true;
+        }
+
+        if (changed) {
+            name.setNodeValue(text);
+        }
+    }
+
+    private void print(Document doc) {
+        // print to stdout
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer transformer;
+        try {
+            transformer = tf.newTransformer();
+        } catch (TransformerConfigurationException ex) {
+            throw new IllegalStateException("Cannot get transformer", ex);
+        }
+
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+        try {
+            transformer.transform(new DOMSource(doc),
+                    new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+        } catch (TransformerException ex) {
+            throw new IllegalStateException("Cannot process document", ex);
+        } catch (UnsupportedEncodingException ex) {
+            throw new IllegalStateException("Unsupported encoding for document", ex);
+        }
     }
 }
