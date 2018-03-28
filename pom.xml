@@ -29,7 +29,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>com.zemiak.gpx.App</mainClass>
+              <mainClass>com.zemiak.gpx.Application</mainClass>
             </manifest>
           </archive>
         </configuration>

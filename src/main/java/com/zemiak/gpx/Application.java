@@ -22,7 +22,7 @@ public class Application
         DocumentBuilder db = dbf.newDocumentBuilder();
         dom = db.parse(fileName);
 
-        new Processor().process(dom);
+        new Processor(dom).process();
     }
 
     private static void usage() {
