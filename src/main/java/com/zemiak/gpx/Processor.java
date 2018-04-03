@@ -44,7 +44,7 @@ public class Processor {
 
     private String getHint(Node cache) throws DOMException {
         Node hint = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:encoded_hints");
-        String hintText = (null == hint) ? "<none>" : hint.getNodeValue();
+        String hintText = (null == hint) ? "<none>" : hint.getFirstChild().getNodeValue();
         return hintText;
     }
 
@@ -68,7 +68,7 @@ public class Processor {
             boolean attrIncluded = "1".equals(attr.getAttributes().getNamedItem("inc").getNodeValue());
             String attrText = attr.getTextContent();
 
-            attrs.add((attrIncluded ? "Yes:" : "NO:") + attrText);
+            attrs.add((attrIncluded ? "Y:" : "N:") + attrText);
         }
 
         return attrs.stream().collect(Collectors.joining("\n"));

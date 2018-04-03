@@ -10,23 +10,23 @@ public class CacheModifier {
 
     private static void modifyDescription(Node cache, String attrs, String hint) {
         Node desc = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:long_description");
-        desc.setNodeValue(attrs.replace("\n", "<p>&nbsp;.</p>")
+        desc.getFirstChild().setNodeValue(attrs.replace("\n", "<p>&nbsp;.</p>")
                 + "<p>&nbsp;.</p><p>&nbsp;.</p>"
                 + hint
                 + "<p>&nbsp;.</p><p>&nbsp;.</p>"
-                + desc.getNodeValue());
+                + desc.getFirstChild().getNodeValue());
     }
 
     private static void modifyHint(Node cache, String attrs, String hint) {
         Node hintNode = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:encoded_hints");
-        hintNode.setNodeValue(attrs.replace("\n", "<p>&nbsp;.</p>")
+        hintNode.getFirstChild().setNodeValue(attrs.replace("\n", "<p>&nbsp;.</p>")
                 + "<p>&nbsp;.</p><p>&nbsp;.</p>"
                 + hint);
     }
 
     public static void updateNameIfNeeded(Node wpt, boolean archived, boolean disabled) {
         Node name = NodeFinder.findNode(wpt.getChildNodes(), "urlname");
-        String text = name.getNodeValue();
+        String text = name.getFirstChild().getNodeValue();
         boolean changed = false;
 
         if (archived) {
@@ -40,7 +40,7 @@ public class CacheModifier {
         }
 
         if (changed) {
-            name.setNodeValue(text);
+            name.getFirstChild().setNodeValue(text);
         }
     }
 }
