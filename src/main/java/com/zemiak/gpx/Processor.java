@@ -14,7 +14,7 @@ public class Processor {
         this.dom = dom;
     }
 
-    public void process() {
+    public String process() {
         Node gpx = dom.getChildNodes().item(0);
         if (null == gpx) {
             throw new IllegalStateException("The document does not have a main node");
@@ -26,7 +26,7 @@ public class Processor {
 
         NodeFinder.findNodes(gpx.getChildNodes(), "wpt").forEach(wpt -> processWaypoint(wpt));
 
-        DocumentPrinter.print(dom);
+        return DocumentPrinter.print(dom);
     }
 
     private void processWaypoint(Node wpt) {

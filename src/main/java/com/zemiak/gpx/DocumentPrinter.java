@@ -1,16 +1,13 @@
 package com.zemiak.gpx;
 
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import static java.lang.System.out;
+import java.io.StringWriter;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 
 public class DocumentPrinter {
-    public static void print(Document doc) {
-        // print to stdout
+    public static String print(Document doc) {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer;
         try {
@@ -25,13 +22,15 @@ public class DocumentPrinter {
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
+        StringWriter stringWriter = new StringWriter();
+        StreamResult result = new StreamResult(stringWriter);
+
         try {
-            transformer.transform(new DOMSource(doc),
-                    new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+            transformer.transform(new DOMSource(doc), result);
         } catch (TransformerException ex) {
             throw new IllegalStateException("Cannot process document", ex);
-        } catch (UnsupportedEncodingException ex) {
-            throw new IllegalStateException("Unsupported encoding for document", ex);
         }
+
+        return result.toString();
     }
 }
