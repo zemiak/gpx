@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,12 +21,11 @@ public class Application
             usage();
         }
 
-        Getopt opts = new Getopt(args, "eg", "enrich", "ggz");
+        Getopt opts = new Getopt(args, "e", "enrich");
         boolean enrich = opts.hasOptions("-e") || opts.hasOptions("--enrich");
-        boolean ggz = opts.hasOptions("-g") || opts.hasOptions("--ggz");
         String[] files = opts.getArgs();
 
-        if ((files.length == 0) || (!ggz && files.length > 1) || (!enrich && !ggz)) {
+        if (files.length == 0) {
             usage();
         }
 
@@ -40,16 +38,14 @@ public class Application
             }
         }
 
-        if (ggz) {
-            GgzProducer ggzProducer = new GgzProducer(gpx.entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList()));
-            ggzProducer.print();
-        }
+        GgzProducer ggzProducer = new GgzProducer();
+        ggzProducer.process(gpx);
+        ggzProducer.close();
     }
 
     private static void usage() {
-        System.out.println("Usage: gpx --enrich <gpx-file>");
-        System.out.println("       gpx [--enrich] --ggz <gpx-file> [gpx-file 2] [gpx-file 3] ...");
-        System.out.println("The output is written to stdout. Instead of long options, you can use \"g\" or \"e\"");
+        System.out.println("Usage: gpx [--enrich] <gpx-file> [gpx-file-2] ...");
+        System.out.println("The output (GGZ) is written to stdout. Instead of long options, you can use \"-e\"");
     }
 
     private static String enrich(String fileName) {
