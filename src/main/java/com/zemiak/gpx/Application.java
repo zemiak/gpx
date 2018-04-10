@@ -3,9 +3,6 @@ package com.zemiak.gpx;
 import com.github.anorber.optget.Getopt;
 import com.zemiak.ggz.GgzProducer;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
@@ -16,6 +13,8 @@ import org.xml.sax.SAXException;
 
 public class Application
 {
+    private static final DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
+
     public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException {
         if (args.length == 0) {
             usage();
@@ -29,12 +28,12 @@ public class Application
             usage();
         }
 
-        Map<String, String> gpx = new HashMap<>();
+        Map<String, Document> gpx = new HashMap<>();
         for (String fileName: files) {
             if (enrich) {
                 gpx.put(fileName, enrich(fileName));
             } else {
-                gpx.put(fileName, catFile(fileName));
+                gpx.put(fileName, parseFile(fileName));
             }
         }
 
@@ -48,31 +47,25 @@ public class Application
         System.out.println("The output (GGZ) is written to stdout. Instead of long options, you can use \"-e\"");
     }
 
-    private static String enrich(String fileName) {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        Document dom;
-
+    private static Document parseFile(String fileName) {
         DocumentBuilder db;
         try {
-            db = dbf.newDocumentBuilder();
+            db = DBF.newDocumentBuilder();
         } catch (ParserConfigurationException ex) {
             throw new IllegalStateException(ex);
         }
 
+        Document dom;
         try {
             dom = db.parse(fileName);
         } catch (SAXException | IOException ex) {
             throw new IllegalStateException(ex);
         }
 
-        return new Processor(dom).process();
+        return dom;
     }
 
-    private static String catFile(String fileName) {
-        try {
-            return new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
-        }
+    private static Document enrich(String fileName) {
+        return new Processor(parseFile(fileName)).process();
     }
 }

@@ -1,5 +1,6 @@
 package com.zemiak.ggz;
 
+import com.zemiak.gpx.DocumentPrinter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -10,10 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.w3c.dom.Document;
 
 public class GgzProducer {
     FileSystem zipfs;
     String fileName;
+    final Index index = new Index();
 
     public GgzProducer() throws IOException {
         this(File.createTempFile("ggz-file-name", ".zip").getAbsolutePath());
@@ -28,15 +31,26 @@ public class GgzProducer {
         this.fileName = fileName;
     }
 
-    public void process(Map<String, String> gpx) {
+    public void process(Map<String, Document> gpx) {
         gpx.entrySet().stream().forEach(e -> {
-            Path internalPath = zipfs.getPath(e.getKey());
+            Document doc = gpx.get(e);
+            index.add(e.getKey(), doc);
+
+            Path internalPath = zipfs.getPath("data", e.getKey());
+            String xml = DocumentPrinter.print(doc);
             try {
-                Files.write(internalPath, e.getValue().getBytes(Charset.forName("UTF-8")));
+                Files.write(internalPath, xml.getBytes(Charset.forName("UTF-8")));
             } catch (IOException ex) {
                 throw new RuntimeException("Cannot add a file " + e.getKey() + " into ZIP", ex);
             }
         });
+
+        Path indexPath = zipfs.getPath("index", "com", "garmin", "geocaches", "v0", "index.xml");
+        try {
+            Files.write(indexPath, index.toString().getBytes(Charset.forName("UTF-8")));
+        } catch (IOException ex) {
+            throw new RuntimeException("Cannot add an index " + index.toString() + " into ZIP", ex);
+        }
     }
 
     public void close() throws IOException {
