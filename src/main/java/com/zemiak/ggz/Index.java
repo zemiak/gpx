@@ -63,13 +63,15 @@ public class Index {
 
         addElement(file, "time", Instant.now().toString());
 
-        NodeFinder.findNodes(gpx.getChildNodes(), "wpt").forEach(wpt -> Entry.processWaypoint(file, wpt));
+        NodeFinder.findNodes(gpx.getChildNodes(), "wpt").forEach(wpt -> {
+            Entry.processWaypoint(doc, file, wpt, wpt.getPositionInFile(), wpt.getEntrySizeInFile());
+        });
 
         rootElement.appendChild(file);
     }
 
     private void addElement(Element el, String name, String data) {
-        Element child = doc.createElement("name");
+        Element child = doc.createElement(name);
         child.appendChild(doc.createTextNode(data));
         el.appendChild(child);
     }
