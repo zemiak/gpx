@@ -1,6 +1,5 @@
 package com.zemiak.ggz;
 
-import com.zemiak.gpx.DocumentPrinter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -9,14 +8,15 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 public class GgzProducer {
     FileSystem zipfs;
-    String fileName;
-    final Index index = new Index();
+    String zipFileName;
 
     public GgzProducer() throws IOException {
         this(File.createTempFile("ggz-file-name", ".zip").getAbsolutePath());
@@ -28,26 +28,42 @@ public class GgzProducer {
 
         URI uri = URI.create("file:" + fileName);
         zipfs = FileSystems.newFileSystem(uri, env);
-        this.fileName = fileName;
+        this.zipFileName = fileName;
     }
 
-    public void process(Map<String, Document> gpx) {
-        gpx.entrySet().stream().forEach(e -> {
-            Document doc = gpx.get(e);
-            index.add(e.getKey(), doc);
+    public void process(List<Node> gpx) {
+        int i = 0;
 
-            Path internalPath = zipfs.getPath("data", e.getKey());
-            String xml = DocumentPrinter.print(doc);
-            try {
-                Files.write(internalPath, xml.getBytes(Charset.forName("UTF-8")));
-            } catch (IOException ex) {
-                throw new RuntimeException("Cannot add a file " + e.getKey() + " into ZIP", ex);
+        int filePos = 0;
+        int count = 0;
+        List<Entry> indexEntries = new ArrayList<>();
+        List<Node> entries = new ArrayList<>();
+
+        String fileName = String.valueOf(System.currentTimeMillis());
+        String gpxFileHeader = startGpxFile();
+
+        while (i < gpx.size()) {
+            Entry e = new Entry(gpx.get(i));
+            e.setFileName(fileName);
+            e.setFilePos(gpxFileHeader.length() + filePos);
+            String gpxEntry = getGpxEntryAsString(e);
+            e.setFileSize(gpxEntry.length());
+            indexEntries.add(e);
+            entries.add(gpx.get(i));
+
+            count++;
+            if (count >= 512) {
+                flushFile(fileName, gpxFileHeader, entries);
             }
-        });
+        }
+
+        if (! indexEntries.isEmpty()) {
+            flushFile(fileName, gpxFileHeader, entries);
+        }
 
         Path indexPath = zipfs.getPath("index", "com", "garmin", "geocaches", "v0", "index.xml");
         try {
-            Files.write(indexPath, index.toString().getBytes(Charset.forName("UTF-8")));
+            Files.write(indexPath, indexEntries.toString().getBytes(Charset.forName("UTF-8")));
         } catch (IOException ex) {
             throw new RuntimeException("Cannot add an index " + index.toString() + " into ZIP", ex);
         }
@@ -58,6 +74,18 @@ public class GgzProducer {
     }
 
     public String getFile() {
-        return fileName;
+        return zipFileName;
+    }
+
+    private String getGpxEntryAsString(Entry e) {
+        1/
+    }
+
+    private String startGpxFile() {
+        2/
+    }
+
+    private void flushFile(String fileName, String gpxFileHeader, List<Node> entries) {
+        3/
     }
 }

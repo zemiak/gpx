@@ -1,30 +1,70 @@
 package com.zemiak.ggz;
 
+import com.zemiak.gpx.NodeFinder;
+import com.zemiak.gpx.Printer;
+import java.util.HashMap;
+import java.util.Map;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class Entry {
-    public static void processWaypoint(Document doc, Element file, Node wpt, int filePos, int entrySizeInBytes) {
-        Element gch = doc.createElement("gch");
-        addElement(doc, gch, "code", getCacheCode(wpt));
-        addElement(doc, gch, "name", getCacheName(wpt));
-        addElement(doc, gch, "type", getCacheType(wpt));
-        addElement(doc, gch, "lat", getCacheLat(wpt));
-        addElement(doc, gch, "lon", getCacheLon(wpt));
-        addElement(doc, gch, "file_pos", String.valueOf(filePos));
-        addElement(doc, gch, "file_size", String.valueOf(entrySizeInBytes));
+    private final String code;
+    private final String name;
+    private final String type;
+    private final String lat;
+    private final String lon;
+    private Integer filePos;
+    private Integer fileSize;
+    private final String awesomeness = "3.0";
+    private final String difficulty;
+    private final String size;
+    private final String terrain;
+    private final Boolean found;
+    private String fileName;
 
-        Element ratings = doc.createElement("ratings");
-        addElement(doc, ratings, "awesomeness", getCacheAwesomeness(wpt));
-        addElement(doc, ratings, "difficulty", getCacheDifficulty(wpt));
-        addElement(doc, ratings, "size", getCacheSize(wpt));
-        addElement(doc, ratings, "terrain", getCacheTerrain(wpt));
-        gch.appendChild(ratings);
+    public static final Map<String, String> SIZES = new HashMap<>();
+    static {
+        SIZES.put("micro", "2.0");
+        SIZES.put("small", "3.0");
+        SIZES.put("regular", "4.0");
+        SIZES.put("large", "5.0");
+        SIZES.put("other", "-1.0");
+        SIZES.put("no chosen", "-2.0");
+        SIZES.put("virtual", "0.0");
+    }
 
-        addElement(doc, gch, "found", getCacheFound(wpt) ? "true" : "false");
+    public Entry(Node wpt) {
+        Node cache = NodeFinder.findNode(wpt.getChildNodes(), "groundspeak:cache");
+        code = NodeFinder.findNode(wpt.getChildNodes(), "name").getFirstChild().getNodeValue();
+        name = NodeFinder.findNode(wpt.getChildNodes(), "urlname").getFirstChild().getNodeValue();
+        type = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:type").getFirstChild().getNodeValue();
+        lat = wpt.getAttributes().getNamedItem("lat").getNodeValue();
+        lon = wpt.getAttributes().getNamedItem("lon").getNodeValue();
+        difficulty = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:difficulty").getFirstChild().getNodeValue();
+        size = SIZES.get(NodeFinder.findNode(cache.getChildNodes(), "groundspeak:container").getFirstChild().getNodeValue().toLowerCase());
+        terrain = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:terrain").getFirstChild().getNodeValue();
+        found = false;
+    }
 
-        file.appendChild(gch);
+    public void setFilePos(Integer filePos) {
+        this.filePos = filePos;
+    }
+
+    public void setFileSize(Integer fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String toString(Document doc) {
+        return Printer.print(getGch(doc), false);
     }
 
     private static void addElement(Document doc, Element el, String name, String data) {
@@ -33,43 +73,25 @@ public class Entry {
         el.appendChild(child);
     }
 
-    private static String getCacheCode(Node wpt) {
-        1
-    }
+    private Element getGch(Document doc) {
+        Element gch = doc.createElement("gch");
+        addElement(doc, gch, "code", code);
+        addElement(doc, gch, "name", name);
+        addElement(doc, gch, "type", type);
+        addElement(doc, gch, "lat", lat);
+        addElement(doc, gch, "lon", lon);
+        addElement(doc, gch, "file_pos", String.valueOf(filePos));
+        addElement(doc, gch, "file_size", String.valueOf(fileSize));
 
-    private static String getCacheName(Node wpt) {
-        2
-    }
+        Element ratings = doc.createElement("ratings");
+        addElement(doc, ratings, "awesomeness", awesomeness);
+        addElement(doc, ratings, "difficulty", difficulty);
+        addElement(doc, ratings, "size", size);
+        addElement(doc, ratings, "terrain", terrain);
+        gch.appendChild(ratings);
 
-    private static String getCacheType(Node wpt) {
-        3
-    }
+        addElement(doc, gch, "found", found ? "true" : "false");
 
-    private static String getCacheLat(Node wpt) {
-        4
-    }
-
-    private static String getCacheLon(Node wpt) {
-        5
-    }
-
-    private static String getCacheAwesomeness(Node wpt) {
-        6
-    }
-
-    private static String getCacheDifficulty(Node wpt) {
-        7
-    }
-
-    private static String getCacheSize(Node wpt) {
-        8
-    }
-
-    private static String getCacheTerrain(Node wpt) {
-        9
-    }
-
-    private static boolean getCacheFound(Node wpt) {
-        10
+        return gch;
     }
 }

@@ -3,8 +3,6 @@ package com.zemiak.gpx;
 import com.github.anorber.optget.Getopt;
 import com.zemiak.ggz.GgzProducer;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,17 +26,19 @@ public class Application
             usage();
         }
 
-        Map<String, Document> gpx = new HashMap<>();
+        Document gpx;
         for (String fileName: files) {
             if (enrich) {
-                gpx.put(fileName, enrich(fileName));
+                gpx = enrich(fileName);
             } else {
-                gpx.put(fileName, parseFile(fileName));
+                gpx = parseFile(fileName);
             }
+
+            NodeFinder.findNodes(gpx.getChildNodes(), "wpt").forEach(GpxStore::add);
         }
 
         GgzProducer ggzProducer = new GgzProducer();
-        ggzProducer.process(gpx);
+        ggzProducer.process(GpxStore.getAll());
         ggzProducer.close();
     }
 
