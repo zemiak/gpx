@@ -40,7 +40,7 @@ public class GgzProducer {
         List<Node> entries = new ArrayList<>();
 
         String fileName = String.valueOf(System.currentTimeMillis());
-        String gpxFileHeader = startGpxFile();
+        String gpxFileHeader = startGpxFile(fileName);
 
         while (i < gpx.size()) {
             Entry e = new Entry(gpx.get(i));
@@ -81,7 +81,7 @@ public class GgzProducer {
         1/
     }
 
-    private String startGpxFile() {
+    private String startGpxFile(String fileName) {
         2/
     }
 
