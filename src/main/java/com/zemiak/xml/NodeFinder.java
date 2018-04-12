@@ -1,4 +1,4 @@
-package com.zemiak.gpx;
+package com.zemiak.xml;
 
 import java.util.ArrayList;
 import java.util.List;

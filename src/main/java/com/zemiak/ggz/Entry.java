@@ -1,7 +1,7 @@
 package com.zemiak.ggz;
 
-import com.zemiak.gpx.NodeFinder;
-import com.zemiak.gpx.Printer;
+import com.zemiak.xml.NodeFinder;
+import com.zemiak.xml.Printer;
 import java.util.HashMap;
 import java.util.Map;
 import org.w3c.dom.Document;

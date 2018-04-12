@@ -1,4 +1,4 @@
-package com.zemiak.gpx;
+package com.zemiak.xml;
 
 import java.io.StringWriter;
 import javax.xml.transform.*;

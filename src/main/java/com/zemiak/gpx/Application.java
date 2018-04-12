@@ -1,5 +1,6 @@
 package com.zemiak.gpx;
 
+import com.zemiak.xml.NodeFinder;
 import com.github.anorber.optget.Getopt;
 import com.zemiak.ggz.GgzProducer;
 import java.io.IOException;

@@ -1,5 +1,6 @@
 package com.zemiak.gpx;
 
+import com.zemiak.xml.NodeFinder;
 import org.w3c.dom.Node;
 
 public class CacheModifier {
