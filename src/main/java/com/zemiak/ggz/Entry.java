@@ -4,11 +4,16 @@ import com.zemiak.xml.NodeFinder;
 import com.zemiak.xml.Printer;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class Entry {
+    private static final DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
+
     private final String code;
     private final String name;
     private final String type;
@@ -63,7 +68,17 @@ public class Entry {
         return fileName;
     }
 
-    public String toString(Document doc) {
+    @Override
+    public String toString() {
+        DocumentBuilder db;
+        try {
+            db = DBF.newDocumentBuilder();
+        } catch (ParserConfigurationException ex) {
+            throw new IllegalStateException(ex);
+        }
+
+        Document doc = db.newDocument();
+
         return Printer.print(getGch(doc), false);
     }
 
