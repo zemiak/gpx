@@ -1,6 +1,5 @@
 package com.zemiak.ggz;
 
-import com.zemiak.xml.Printer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -13,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Node;
 
 public class GgzProducer {
@@ -39,7 +36,7 @@ public class GgzProducer {
 
         int count = 0;
         List<Entry> indexEntries = new ArrayList<>();
-        List<Node> entries = new ArrayList<>();
+        List<Node> gpxEntries = new ArrayList<>();
 
         String fileName = String.valueOf(System.currentTimeMillis());
         String gpxFileHeader = startGpxFile(fileName);
@@ -52,11 +49,15 @@ public class GgzProducer {
             String gpxEntry = e.toString();
             e.setFileSize(gpxEntry.length());
             indexEntries.add(e);
-            entries.add(gpx.get(i));
+            gpxEntries.add(gpx.get(i));
 
             count++;
             if (count >= 512) {
-                flushFile(fileName, gpxFileHeader, entries);
+                try {
+                    flushFile(fileName, gpxFileHeader, gpxEntries);
+                } catch (IOException ex) {
+                    throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
+                }
 
                 fileName = String.valueOf(System.currentTimeMillis());
                 gpxFileHeader = startGpxFile(fileName);
@@ -67,7 +68,11 @@ public class GgzProducer {
         }
 
         if (! indexEntries.isEmpty()) {
-            flushFile(fileName, gpxFileHeader, entries);
+            try {
+                flushFile(fileName, gpxFileHeader, gpxEntries);
+            } catch (IOException ex) {
+                throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
+            }
         }
 
         Path indexPath = zipfs.getPath("index", "com", "garmin", "geocaches", "v0", "index.xml");
@@ -84,6 +89,18 @@ public class GgzProducer {
 
     public String getFile() {
         return zipFileName;
+    }
+
+    private String endGpxFile() {
+        return "</gpx>\n";
+    }
+
+    private void flushFile(String fileName, String gpxFileHeader, List<Node> gpxEntries) throws IOException {
+        StringBuilder text = new StringBuilder(gpxFileHeader);
+        gpxEntries.forEach(e -> text.append(e.toString()));
+        text.append(endGpxFile());
+
+        Files.write(zipfs.getPath("data", fileName + ".gpx"), text.toString().getBytes());
     }
 
     private String startGpxFile(String fileName) {
@@ -103,13 +120,5 @@ public class GgzProducer {
         {{MINLON}} take from original gpx file
         {{MAXLAT}} take from original gpx file
         {{MAXLON}} take from original gpx file
-    }
-
-    private String endGpxFile() {
-        return "</gpx>\n";
-    }
-
-    private void flushFile(String fileName, String gpxFileHeader, List<Node> entries) {
-        2/
     }
 }
