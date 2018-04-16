@@ -120,7 +120,7 @@ public class GgzProducer {
 "  <email>contact@groundspeak.com</email>\n" +
 "  <time>{{TIME}}</time>\n" +
 "  <keywords>cache, geocache, groundspeak</keywords>\n" +
-"  <bounds minlat=\"{{MINLAT}}\" minlon=\"{{MINLON}}\" maxlat=\"{{MAXLAT}}\" maxlon=\"{{MAXLON}}\" />"
+"  <bounds minlat={{MINLAT.}} minlon={{MINLON.}} maxlat={{MAXLAT.}} maxlon={{MAXLON.}} />"
         .replace("{{NAME}}", fileName)
         .replace("{{TIME}}", Instant.now().toString())
                 ;

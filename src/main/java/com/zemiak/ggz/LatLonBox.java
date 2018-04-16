@@ -1,6 +1,12 @@
 package com.zemiak.ggz;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 public class LatLonBox {
+    private static final String FORMAT = "#00.000000";
+    private final NumberFormat formatter = new DecimalFormat(FORMAT);
+
     private double minlat = 1000.0;
     private double minlon = 1000.0;
     private double maxlat = 0.0;
@@ -44,15 +50,15 @@ public class LatLonBox {
     }
 
     public String updateGpxHeader(String gpxFileHeader) {
-        gpxFileHeader = updatePlaceholder(gpxFileHeader, "{{MINLAT}}", minlat);
-        gpxFileHeader = updatePlaceholder(gpxFileHeader, "{{MINLON}}", minlon);
-        gpxFileHeader = updatePlaceholder(gpxFileHeader, "{{MAXLAT}}", maxlat);
-        gpxFileHeader = updatePlaceholder(gpxFileHeader, "{{MAXLON}}", maxlon);
+        gpxFileHeader = updatePlaceholder(gpxFileHeader, "{{MINLAT.}}", minlat);
+        gpxFileHeader = updatePlaceholder(gpxFileHeader, "{{MINLON.}}", minlon);
+        gpxFileHeader = updatePlaceholder(gpxFileHeader, "{{MAXLAT.}}", maxlat);
+        gpxFileHeader = updatePlaceholder(gpxFileHeader, "{{MAXLON.}}", maxlon);
 
         return gpxFileHeader;
     }
 
-    private String updatePlaceholder(String header, String placeholder, double value) {
-        fixed length!
+    private String updatePlaceholder(String header, String placeholder, double val) {
+        return header.replace(placeholder, "\"" + formatter.format(val) + "\"");
     }
 }
