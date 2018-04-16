@@ -8,6 +8,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,9 @@ public class GgzProducer {
         String fileName = String.valueOf(System.currentTimeMillis());
         String gpxFileHeader = startGpxFile(fileName);
         int filePos = gpxFileHeader.length();
+        LatLonBox box = new LatLonBox();
+
+        double minlat = 1000.0, minlon = 1000.0, maxlat = 0.0, maxlon = 0.0;
 
         while (i < gpx.size()) {
             Entry e = new Entry(gpx.get(i));
@@ -50,11 +54,13 @@ public class GgzProducer {
             e.setFileSize(gpxEntry.length());
             indexEntries.add(e);
             gpxEntries.add(gpx.get(i));
+            box.update(e);
 
             count++;
             if (count >= 512) {
                 try {
-                    flushFile(fileName, gpxFileHeader, gpxEntries);
+                    flushFile(fileName, gpxFileHeader, gpxEntries, box);
+                    box = new LatLonBox();
                 } catch (IOException ex) {
                     throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
                 }
@@ -69,7 +75,7 @@ public class GgzProducer {
 
         if (! indexEntries.isEmpty()) {
             try {
-                flushFile(fileName, gpxFileHeader, gpxEntries);
+                flushFile(fileName, gpxFileHeader, gpxEntries, box);
             } catch (IOException ex) {
                 throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
             }
@@ -95,7 +101,9 @@ public class GgzProducer {
         return "</gpx>\n";
     }
 
-    private void flushFile(String fileName, String gpxFileHeader, List<Node> gpxEntries) throws IOException {
+    private void flushFile(String fileName, String gpxFileHeader, List<Node> gpxEntries,
+            LatLonBox box) throws IOException {
+        gpxFileHeader = box.updateGpxHeader(gpxFileHeader);
         StringBuilder text = new StringBuilder(gpxFileHeader);
         gpxEntries.forEach(e -> text.append(e.toString()));
         text.append(endGpxFile());
@@ -112,13 +120,10 @@ public class GgzProducer {
 "  <email>contact@groundspeak.com</email>\n" +
 "  <time>{{TIME}}</time>\n" +
 "  <keywords>cache, geocache, groundspeak</keywords>\n" +
-"  <bounds minlat=\"{{MINLAT}}\" minlon=\"{{MINLON}}\" maxlat=\"{{MAXLAT}}\" maxlon=\"{{MAXLON}}\" />";
+"  <bounds minlat=\"{{MINLAT}}\" minlon=\"{{MINLON}}\" maxlat=\"{{MAXLAT}}\" maxlon=\"{{MAXLON}}\" />"
+        .replace("{{NAME}}", fileName)
+        .replace("{{TIME}}", Instant.now().toString())
+                ;
 
-        {{NAME}} take from original gpx file
-        {{TIME}} 2018-03-13T09:55:06.8568462Z - take from Instant.now().toString()
-        {{MINLAT}} take from original gpx file
-        {{MINLON}} take from original gpx file
-        {{MAXLAT}} take from original gpx file
-        {{MAXLON}} take from original gpx file
     }
 }

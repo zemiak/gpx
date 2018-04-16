@@ -109,4 +109,16 @@ public class Entry {
 
         return gch;
     }
+
+    public String getCode() {
+        return this.code;
+    }
+
+    public String getLat() {
+        return lat;
+    }
+
+    public String getLon() {
+        return lon;
+    }
 }
