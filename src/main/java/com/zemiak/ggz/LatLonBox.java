@@ -59,6 +59,6 @@ public class LatLonBox {
     }
 
     private String updatePlaceholder(String header, String placeholder, double val) {
-        return header.replace(placeholder, "\"" + formatter.format(val) + "\"");
+        return header.replace(placeholder, "\"" + formatter.format(val).replace(",", ".") + "\"");
     }
 }
