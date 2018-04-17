@@ -35,7 +35,7 @@ public class Application
                 gpx = parseFile(fileName);
             }
 
-            NodeFinder.findNodes(gpx.getChildNodes(), "wpt").forEach(GpxStore::add);
+            NodeFinder.findNodes(gpx.getChildNodes(), "wpt").forEach(node -> GpxStore.add(fileName, node));
         }
 
         GgzProducer ggzProducer = new GgzProducer();

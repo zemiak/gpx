@@ -18,6 +18,8 @@ import org.w3c.dom.Node;
 public class GgzProducer {
     FileSystem zipfs;
     String zipFileName;
+    List<Node> gpxEntries;
+    List<Entry> indexEntries;
 
     public GgzProducer() throws IOException {
         this(File.createTempFile("ggz-file-name", ".zip").getAbsolutePath());
@@ -30,56 +32,13 @@ public class GgzProducer {
         URI uri = URI.create("file:" + fileName);
         zipfs = FileSystems.newFileSystem(uri, env);
         this.zipFileName = fileName;
+
+        indexEntries = new ArrayList<>();
+        gpxEntries = new ArrayList<>();
     }
 
-    public void process(List<Node> gpx) {
-        int i = 0;
-
-        int count = 0;
-        List<Entry> indexEntries = new ArrayList<>();
-        List<Node> gpxEntries = new ArrayList<>();
-
-        String fileName = String.valueOf(System.currentTimeMillis());
-        String gpxFileHeader = startGpxFile(fileName);
-        int filePos = gpxFileHeader.length();
-        LatLonBox box = new LatLonBox();
-
-        double minlat = 1000.0, minlon = 1000.0, maxlat = 0.0, maxlon = 0.0;
-
-        while (i < gpx.size()) {
-            Entry e = new Entry(gpx.get(i));
-            e.setFileName(fileName);
-            e.setFilePos(filePos);
-            String gpxEntry = e.toString();
-            e.setFileSize(gpxEntry.length());
-            indexEntries.add(e);
-            gpxEntries.add(gpx.get(i));
-            box.update(e);
-
-            count++;
-            if (count >= 512) {
-                try {
-                    flushFile(fileName, gpxFileHeader, gpxEntries, box);
-                    box = new LatLonBox();
-                } catch (IOException ex) {
-                    throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
-                }
-
-                fileName = String.valueOf(System.currentTimeMillis());
-                gpxFileHeader = startGpxFile(fileName);
-                filePos = gpxFileHeader.length();
-            } else {
-                filePos += gpxEntry.length();
-            }
-        }
-
-        if (! indexEntries.isEmpty()) {
-            try {
-                flushFile(fileName, gpxFileHeader, gpxEntries, box);
-            } catch (IOException ex) {
-                throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
-            }
-        }
+    public void process(Map<String, List<Node>> gpx) {
+        gpx.keySet().forEach(gpxFile -> process(gpxFile, gpx.get(gpxFile)));
 
         Path indexPath = zipfs.getPath("index", "com", "garmin", "geocaches", "v0", "index.xml");
         try {
@@ -125,5 +84,49 @@ public class GgzProducer {
         .replace("{{TIME}}", Instant.now().toString())
                 ;
 
+    }
+
+    private void process(String fileName, List<Node> gpx) {
+        int i = 0;
+        int count = 0;
+
+        String gpxFileHeader = startGpxFile(fileName);
+        int filePos = gpxFileHeader.length();
+        LatLonBox box = new LatLonBox();
+
+        while (i < gpx.size()) {
+            Entry e = new Entry(gpx.get(i));
+            e.setFileName(fileName);
+            e.setFilePos(filePos);
+            String gpxEntry = e.toString();
+            e.setFileSize(gpxEntry.length());
+            indexEntries.add(e);
+            gpxEntries.add(gpx.get(i));
+            box.update(e);
+
+            count++;
+            if (count >= 512) {
+                try {
+                    flushFile(fileName, gpxFileHeader, gpxEntries, box);
+                    box = new LatLonBox();
+                } catch (IOException ex) {
+                    throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
+                }
+
+                fileName = String.valueOf(System.currentTimeMillis());
+                gpxFileHeader = startGpxFile(fileName);
+                filePos = gpxFileHeader.length();
+            } else {
+                filePos += gpxEntry.length();
+            }
+        }
+
+        if (! indexEntries.isEmpty()) {
+            try {
+                flushFile(fileName, gpxFileHeader, gpxEntries, box);
+            } catch (IOException ex) {
+                throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
+            }
+        }
     }
 }
