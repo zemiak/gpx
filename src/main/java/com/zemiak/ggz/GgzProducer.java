@@ -8,6 +8,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,13 +87,17 @@ public class GgzProducer {
 
     }
 
-    private void process(String fileName, List<Node> gpx) {
+    private void process(String fileNameGiven, List<Node> gpx) {
         int i = 0;
         int count = 0;
+
+        String fileNameWithExt = Paths.get(fileNameGiven).getFileName().toString();
+        String fileName = fileNameWithExt.contains(".") ? fileNameWithExt.substring(0, fileNameWithExt.indexOf(".")) : fileNameWithExt;
 
         String gpxFileHeader = startGpxFile(fileName);
         int filePos = gpxFileHeader.length();
         LatLonBox box = new LatLonBox();
+        int suffix = -1;
 
         while (i < gpx.size()) {
             Entry e = new Entry(gpx.get(i));
@@ -106,8 +111,11 @@ public class GgzProducer {
 
             count++;
             if (count >= 512) {
+                suffix = 0;
+
                 try {
-                    flushFile(fileName, gpxFileHeader, gpxEntries, box);
+                    flushFile(fileName + "_" + suffix, gpxFileHeader, gpxEntries, box);
+                    suffix += 1;
                     box = new LatLonBox();
                 } catch (IOException ex) {
                     throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
@@ -123,7 +131,12 @@ public class GgzProducer {
 
         if (! indexEntries.isEmpty()) {
             try {
-                flushFile(fileName, gpxFileHeader, gpxEntries, box);
+                if (suffix > 0) {
+                    flushFile(fileName + "_" + suffix, gpxFileHeader, gpxEntries, box);
+                } else {
+                    flushFile(fileName, gpxFileHeader, gpxEntries, box);
+                }
+
             } catch (IOException ex) {
                 throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
             }
