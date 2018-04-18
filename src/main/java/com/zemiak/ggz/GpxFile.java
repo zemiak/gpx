@@ -11,7 +11,7 @@ import org.w3c.dom.Node;
 public class GpxFile {
     private final String fileName;
     private final ZipOutputStream zos;
-    private final String header;
+    private String header;
 
     public GpxFile(String fileName, ZipOutputStream zos) {
         this.fileName = fileName;
@@ -24,9 +24,9 @@ public class GpxFile {
 "  <email>contact@groundspeak.com</email>\n" +
 "  <time>{{TIME}}</time>\n" +
 "  <keywords>cache, geocache, groundspeak</keywords>\n" +
-"  <bounds minlat={{MINLAT.}} minlon={{MINLON.}} maxlat={{MAXLAT.}} maxlon={{MAXLON.}} />\n"
-        .replace("{{NAME}}", fileName)
-        .replace("{{TIME}}", Instant.now().toString());
+"  <bounds minlat={{MINLAT.}} minlon={{MINLON.}} maxlat={{MAXLAT.}} maxlon={{MAXLON.}} />\n";
+        this.header = this.header.replace("{{NAME}}", fileName);
+        this.header = this.header.replace("{{TIME}}", Instant.now().toString());
     }
 
     public int getHeaderLength() {
