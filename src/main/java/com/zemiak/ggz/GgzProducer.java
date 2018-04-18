@@ -87,6 +87,7 @@ public class GgzProducer {
 
                 gpxFile = new GpxFile(fileName + "_" + suffix, zos);
                 filePos = gpxFile.getHeaderLength();
+                i = 0;
             } else {
                 filePos += gpxEntry.length();
             }

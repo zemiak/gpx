@@ -35,7 +35,7 @@ public class Entry {
         SIZES.put("regular", "4.0");
         SIZES.put("large", "5.0");
         SIZES.put("other", "-1.0");
-        SIZES.put("no chosen", "-2.0");
+        SIZES.put("not chosen", "-2.0");
         SIZES.put("virtual", "0.0");
     }
 
