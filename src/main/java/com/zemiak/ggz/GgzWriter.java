@@ -15,7 +15,7 @@ public class GgzWriter {
     private static String getHeader() {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
 "<ggz xmlns=\"http://www.opencaching.com/xmlschemas/ggz/1/0\">\n" +
-"  <time>{{TIME}}</time>".replace("{{TIME}}", Instant.now().toString());
+"  <time>{{TIME}}</time>\n".replace("{{TIME}}", Instant.now().toString());
     }
 
     private static String getFooter() {

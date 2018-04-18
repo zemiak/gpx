@@ -54,19 +54,13 @@ public class GgzProducer {
 
     private void process(String fileNameGiven, List<Node> gpx) {
         int i = 0;
-        int count = 0;
-        int suffix = -1;
-
-        if (gpx.size() >= 512) {
-            suffix = 0;
-        }
+        int suffix = 0;
 
         String fileNameWithExt = Paths.get(fileNameGiven).getFileName().toString();
         String fileName = fileNameWithExt.contains(".") ? fileNameWithExt.substring(0, fileNameWithExt.indexOf(".")) : fileNameWithExt;
-        GpxFile gpxFile = new GpxFile(fileName + (suffix == -1 ? "" : "_" + suffix), zos);
+        GpxFile gpxFile = new GpxFile(fileName + "_" + suffix, zos);
 
-        String gpxFileHeader = gpxFile.getHeader();
-        int filePos = gpxFileHeader.length();
+        int filePos = gpxFile.getHeaderLength();
         LatLonBox box = new LatLonBox();
 
 
@@ -80,22 +74,19 @@ public class GgzProducer {
             gpxEntries.add(gpx.get(i));
             box.update(e);
 
-            count++;
-            if (count >= 512) {
-                suffix = 0;
-
+            i++;
+            if (i >= 512) {
                 try {
                     gpxFile.flushFile(gpxEntries, box);
-                    suffix += 1;
-                    box = new LatLonBox();
-
                 } catch (IOException ex) {
-                    throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
+                    throw new RuntimeException("Cannot add an index data/" + fileName + "_" + suffix + ".gpx into ZIP", ex);
                 }
 
+                suffix += 1;
+                box = new LatLonBox();
+
                 gpxFile = new GpxFile(fileName + "_" + suffix, zos);
-                gpxFileHeader = gpxFile.getHeader();
-                filePos = gpxFileHeader.length();
+                filePos = gpxFile.getHeaderLength();
             } else {
                 filePos += gpxEntry.length();
             }

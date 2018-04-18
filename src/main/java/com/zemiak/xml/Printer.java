@@ -6,6 +6,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public class Printer {
     public static String print(Document doc) {
@@ -40,7 +41,7 @@ public class Printer {
             throw new IllegalStateException("Cannot process document", ex);
         }
 
-        return result.toString();
+        return stringWriter.toString();
     }
 
     public static String print(Element doc, Boolean xmlDeclaration) {
@@ -67,6 +68,33 @@ public class Printer {
             throw new IllegalStateException("Cannot process document", ex);
         }
 
-        return result.toString();
+        return stringWriter.toString();
+    }
+
+    public static String print(Node doc, Boolean xmlDeclaration) {
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer transformer;
+        try {
+            transformer = tf.newTransformer();
+        } catch (TransformerConfigurationException ex) {
+            throw new IllegalStateException("Cannot get transformer", ex);
+        }
+
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, xmlDeclaration ? "no" : "yes");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+        StringWriter stringWriter = new StringWriter();
+        StreamResult result = new StreamResult(stringWriter);
+
+        try {
+            transformer.transform(new DOMSource(doc), result);
+        } catch (TransformerException ex) {
+            throw new IllegalStateException("Cannot process document", ex);
+        }
+
+        return stringWriter.toString();
     }
 }
