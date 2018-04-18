@@ -19,7 +19,7 @@ public class ApplicationTest {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
             DocumentBuilder db = dbf.newDocumentBuilder();
-            dom = db.parse("./src/test/resources/test.gpx");
+            dom = db.parse("./src/main/resources/test.gpx");
         } catch (ParserConfigurationException ex) {
             System.err.println("ParserConfigurationException");
         } catch (SAXException ex) {

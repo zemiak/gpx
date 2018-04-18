@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -24,9 +23,6 @@ public class GgzProducer {
     }
 
     public GgzProducer(String fileName) throws IOException {
-        Map<String, String> env = new HashMap<>();
-        env.put("create", "true");
-
         fos = new FileOutputStream(fileName);
         zos = new ZipOutputStream(fos);
 

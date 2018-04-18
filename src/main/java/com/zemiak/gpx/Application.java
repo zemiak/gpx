@@ -4,10 +4,13 @@ import com.github.anorber.optget.Getopt;
 import com.zemiak.ggz.GgzProducer;
 import com.zemiak.xml.NodeFinder;
 import java.io.IOException;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class Application
@@ -35,7 +38,18 @@ public class Application
                 gpx = parseFile(fileName);
             }
 
-            NodeFinder.findNodes(gpx.getChildNodes(), "wpt").forEach(node -> GpxStore.add(fileName, node));
+            List<Node> gpxNodes = NodeFinder.findNodes(gpx.getChildNodes(), "gpx");
+            if (gpxNodes.size() != 1) {
+                missingGpxNode(fileName);
+            }
+
+            NodeList childNodes = gpxNodes.get(0).getChildNodes();
+            List<Node> wptNodes = NodeFinder.findNodes(childNodes, "wpt");
+            wptNodes.forEach(node -> GpxStore.add(fileName, node));
+        }
+
+        if (GpxStore.isEmpty()) {
+            emptyResult();
         }
 
         GgzProducer ggzProducer = new GgzProducer();
@@ -49,6 +63,16 @@ public class Application
         System.out.println("Usage: gpx [--enrich] <gpx-file> [gpx-file-2] ...");
         System.out.println("The output (GGZ) is written to stdout. Instead of long options, you can use \"-e\"");
         System.exit(1);
+    }
+
+    private static void emptyResult() {
+        System.out.println("gpx error: could not read any cache (wpt) from provided file(s)");
+        System.exit(2);
+    }
+
+    private static void missingGpxNode(String fileName) {
+        System.out.println("gpx error: could not read main gpx node from provided file " + fileName);
+        System.exit(2);
     }
 
     private static Document parseFile(String fileName) {

@@ -20,4 +20,8 @@ public class GpxStore {
     public static Map<String, List<Node>> getAll() {
         return GPX;
     }
+
+    public static boolean isEmpty() {
+        return GPX.isEmpty();
+    }
 }
