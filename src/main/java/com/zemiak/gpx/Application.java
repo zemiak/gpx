@@ -1,8 +1,8 @@
 package com.zemiak.gpx;
 
-import com.zemiak.xml.NodeFinder;
 import com.github.anorber.optget.Getopt;
 import com.zemiak.ggz.GgzProducer;
+import com.zemiak.xml.NodeFinder;
 import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,11 +41,14 @@ public class Application
         GgzProducer ggzProducer = new GgzProducer();
         ggzProducer.process(GpxStore.getAll());
         ggzProducer.close();
+
+        System.out.println("Result: " + ggzProducer.getZipFileName());
     }
 
     private static void usage() {
         System.out.println("Usage: gpx [--enrich] <gpx-file> [gpx-file-2] ...");
         System.out.println("The output (GGZ) is written to stdout. Instead of long options, you can use \"-e\"");
+        System.exit(1);
     }
 
     private static Document parseFile(String fileName) {

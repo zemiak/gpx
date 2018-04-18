@@ -1,19 +1,19 @@
 package com.zemiak.ggz;
 
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.w3c.dom.Node;
 
 public class GpxFile {
     private final String fileName;
-    private final FileSystem zipfs;
+    private final ZipOutputStream zos;
 
-    public GpxFile(String fileName, FileSystem zipfs) {
+    public GpxFile(String fileName, ZipOutputStream zos) {
         this.fileName = fileName;
-        this.zipfs = zipfs;
+        this.zos = zos;
     }
 
     public String getHeader() {
@@ -38,7 +38,10 @@ public class GpxFile {
         gpxEntries.forEach(e -> text.append(e.toString()));
         text.append(endGpxFile());
 
-        Files.write(zipfs.getPath("data", fileName + ".gpx"), text.toString().getBytes());
+        ZipEntry ze = new ZipEntry("data/" + fileName + ".gpx");
+        zos.putNextEntry(ze);
+        zos.write(text.toString().getBytes());
+        zos.closeEntry();
     }
 
     private String endGpxFile() {

@@ -1,18 +1,20 @@
 package com.zemiak.ggz;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.file.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.w3c.dom.Node;
 
 public class GgzProducer {
-    FileSystem zipfs;
+    FileOutputStream fos;
+    ZipOutputStream zos;
     String zipFileName;
     List<Node> gpxEntries;
     List<Entry> indexEntries;
@@ -25,8 +27,9 @@ public class GgzProducer {
         Map<String, String> env = new HashMap<>();
         env.put("create", "true");
 
-        URI uri = URI.create("file:" + fileName);
-        zipfs = FileSystems.newFileSystem(uri, env);
+        fos = new FileOutputStream(fileName);
+        zos = new ZipOutputStream(fos);
+
         this.zipFileName = fileName;
 
         indexEntries = new ArrayList<>();
@@ -36,20 +39,21 @@ public class GgzProducer {
     public void process(Map<String, List<Node>> gpx) {
         gpx.keySet().forEach(gpxFile -> process(gpxFile, gpx.get(gpxFile)));
 
-        Path indexPath = zipfs.getPath("index", "com", "garmin", "geocaches", "v0", "index.xml");
+        ZipEntry ze = new ZipEntry("index/com/garmin/geocaches/v0/index.xml");
+
+
         try {
-            Files.write(indexPath, indexEntries.toString().getBytes(Charset.forName("UTF-8")));
+            zos.putNextEntry(ze);
+            zos.write(GgzWriter.getXml(indexEntries).getBytes());
+            zos.closeEntry();
         } catch (IOException ex) {
-            throw new RuntimeException("Cannot add an index " + indexPath.toString() + " into ZIP", ex);
+            throw new RuntimeException("Cannot add an index " + ze.getName() + " into ZIP", ex);
         }
     }
 
     public void close() throws IOException {
-        zipfs.close();
-    }
-
-    public String getFile() {
-        return zipFileName;
+        zos.close();
+        fos.close();
     }
 
     private void process(String fileNameGiven, List<Node> gpx) {
@@ -63,7 +67,7 @@ public class GgzProducer {
 
         String fileNameWithExt = Paths.get(fileNameGiven).getFileName().toString();
         String fileName = fileNameWithExt.contains(".") ? fileNameWithExt.substring(0, fileNameWithExt.indexOf(".")) : fileNameWithExt;
-        GpxFile gpxFile = new GpxFile(fileName + (suffix == -1 ? "" : "_" + suffix), zipfs);
+        GpxFile gpxFile = new GpxFile(fileName + (suffix == -1 ? "" : "_" + suffix), zos);
 
         String gpxFileHeader = gpxFile.getHeader();
         int filePos = gpxFileHeader.length();
@@ -93,7 +97,7 @@ public class GgzProducer {
                     throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
                 }
 
-                gpxFile = new GpxFile(fileName + "_" + suffix, zipfs);
+                gpxFile = new GpxFile(fileName + "_" + suffix, zos);
                 gpxFileHeader = gpxFile.getHeader();
                 filePos = gpxFileHeader.length();
             } else {
@@ -108,5 +112,9 @@ public class GgzProducer {
                 throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
             }
         }
+    }
+
+    public String getZipFileName() {
+        return zipFileName;
     }
 }
