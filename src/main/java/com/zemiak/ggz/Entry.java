@@ -78,9 +78,23 @@ public class Entry {
         }
 
         Document doc = db.newDocument();
+        String res;
 
-        return Printer.print(getGch(doc), false);
+        try {
+            res = Printer.print(getGch(doc), false);
+        } catch (Exception e) {
+            System.err.println(toSimpleString());
+            throw new RuntimeException(e);
+        }
+
+        return res;
     }
+
+    public String toSimpleString() {
+        return "Entry{" + "code=" + code + ", name=" + name + ", type=" + type + ", lat=" + lat + ", lon=" + lon + ", filePos=" + filePos + ", fileSize=" + fileSize + ", awesomeness=" + awesomeness + ", difficulty=" + difficulty + ", size=" + size + ", terrain=" + terrain + ", found=" + found + ", fileName=" + fileName + '}';
+    }
+
+
 
     private static void addElement(Document doc, Element el, String name, String data) {
         Element child = doc.createElement(name);
