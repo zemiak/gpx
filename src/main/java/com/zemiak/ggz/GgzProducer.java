@@ -53,8 +53,7 @@ public class GgzProducer {
     }
 
     private void process(String fileNameGiven, List<Node> gpx) {
-        int i = 0;
-        int suffix = 0;
+        int i = 0, count = 0, suffix = 0;
 
         String fileNameWithExt = Paths.get(fileNameGiven).getFileName().toString();
         String fileName = fileNameWithExt.contains(".") ? fileNameWithExt.substring(0, fileNameWithExt.indexOf(".")) : fileNameWithExt;
@@ -75,7 +74,8 @@ public class GgzProducer {
             box.update(e);
 
             i++;
-            if (i >= 512) {
+            count++;
+            if (count >= 512) {
                 try {
                     gpxFile.flushFile(gpxEntries, box);
                 } catch (IOException ex) {
@@ -87,7 +87,7 @@ public class GgzProducer {
 
                 gpxFile = new GpxFile(fileName + "_" + suffix, zos);
                 filePos = gpxFile.getHeaderLength();
-                i = 0;
+                count = 0;
             } else {
                 filePos += gpxEntry.length();
             }
