@@ -1,20 +1,24 @@
 package com.zemiak.gpx;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.zemiak.xml.NodeFinder;
+import java.util.*;
 import org.w3c.dom.Node;
 
 public class GpxStore {
     private static final Map<String, List<Node>> GPX = new HashMap<>();
+    private static final Set<String> CODES = new HashSet<>();
 
     public static void add(String fileName, Node wpt) {
-        if (!GPX.containsKey(fileName)) {
-            GPX.put(fileName, new ArrayList<>());
-        }
+        String code = NodeFinder.findNode(wpt.getChildNodes(), "name").getFirstChild().getNodeValue();
+        if (!CODES.contains(code)) {
+            CODES.add(code);
 
-        GPX.get(fileName).add(wpt);
+            if (!GPX.containsKey(fileName)) {
+                GPX.put(fileName, new ArrayList<>());
+            }
+
+            GPX.get(fileName).add(wpt);
+        }
     }
 
     public static Map<String, List<Node>> getAll() {

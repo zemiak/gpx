@@ -5,6 +5,7 @@ import com.zemiak.ggz.GgzProducer;
 import com.zemiak.xml.NodeFinder;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,11 +23,18 @@ public class Application
             usage();
         }
 
-        Getopt opts = new Getopt(args, "e", "enrich");
-        boolean enrich = opts.hasOptions("-e") || opts.hasOptions("--enrich");
+        Getopt opts = new Getopt(args, "co:", "copy", "output=");
+        boolean enrich = !opts.hasOptions("c") && !opts.hasOptions("copy");
         String[] files = opts.getArgs();
 
-        if (files.length == 0) {
+        String outputFileName = null;
+        if (opts.hasOptions("o")) {
+            outputFileName = opts.getArgumentString("o");
+        } else if (opts.hasOptions("output")) {
+            outputFileName = opts.getArgumentString("output");
+        }
+
+        if (files.length == 0 || Objects.isNull(outputFileName)) {
             usage();
         }
 
@@ -52,7 +60,7 @@ public class Application
             emptyResult();
         }
 
-        GgzProducer ggzProducer = new GgzProducer();
+        GgzProducer ggzProducer = new GgzProducer(outputFileName);
         ggzProducer.process(GpxStore.getAll());
         ggzProducer.close();
 
@@ -60,8 +68,10 @@ public class Application
     }
 
     private static void usage() {
-        System.out.println("Usage: gpx [--enrich] <gpx-file> [gpx-file-2] ...");
-        System.out.println("The output (GGZ) is written to stdout. Instead of long options, you can use \"-e\"");
+        System.out.println("Usage: gpx <--output|-o> <ggz-file> [--copy|-c] <gpx-file> [gpx-file-2] ...\n");
+        System.out.println("The output (GGZ) is written to stdout.");
+        System.out.println("By default, the input GPX is enhanced with attributes in hint and description.");
+        System.out.println("If you don't wish to enhance it, provide --copy option.");
         System.exit(1);
     }
 
