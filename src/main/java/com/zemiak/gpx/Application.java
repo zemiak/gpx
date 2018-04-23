@@ -20,22 +20,25 @@ public class Application
 
     public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException {
         if (args.length == 0) {
-            usage();
+            usage("No arguments provided");
         }
 
-        Getopt opts = new Getopt(args, "co:", "copy", "output=");
-        boolean enrich = !opts.hasOptions("c") && !opts.hasOptions("copy");
+        Getopt opts = new Getopt(args, "co:");
+
+        boolean enrich = !opts.hasOptions("-c");
         String[] files = opts.getArgs();
 
         String outputFileName = null;
-        if (opts.hasOptions("o")) {
-            outputFileName = opts.getArgumentString("o");
-        } else if (opts.hasOptions("output")) {
-            outputFileName = opts.getArgumentString("output");
+        if (opts.hasOptions("-o")) {
+            outputFileName = opts.getArgumentString("-o");
         }
 
-        if (files.length == 0 || Objects.isNull(outputFileName)) {
-            usage();
+        if (files.length == 0) {
+            usage("You did not provide any GPX file(s)");
+        }
+
+        if (Objects.isNull(outputFileName)) {
+            usage("You did not provide any output file");
         }
 
         Document gpx;
@@ -67,11 +70,12 @@ public class Application
         System.out.println("Result: " + ggzProducer.getZipFileName());
     }
 
-    private static void usage() {
-        System.out.println("Usage: gpx <--output|-o> <ggz-file> [--copy|-c] <gpx-file> [gpx-file-2] ...\n");
-        System.out.println("The output (GGZ) is written to stdout.");
+    private static void usage(String reason) {
+        System.out.println("Usage: gpx -o <ggz-file> [-c] <gpx-file> [gpx-file-2] ...\n");
+        System.out.println("The output (GGZ) is written to stdout. The -o option (output) must be the first argument.");
         System.out.println("By default, the input GPX is enhanced with attributes in hint and description.");
-        System.out.println("If you don't wish to enhance it, provide --copy option.");
+        System.out.println("If you don't wish to enhance it, provide -c (copy) option.");
+        System.out.println("reason: " + reason);
         System.exit(1);
     }
 
