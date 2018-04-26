@@ -1,2 +1,70 @@
 #!/bin/sh
-java -jar target/gpx-1.0-SNAPSHOT.jar $@
+
+FOLDER="${HOME}/.gpx"
+
+which curl >/dev/null
+if [ $? -ne 0 ]
+then
+    echo "Error: cannot find curl"
+    exit 1
+fi
+
+which java >/dev/null
+if [ $? -ne 0 ]
+then
+    echo "Error: cannot find java"
+    exit 2
+fi
+
+mkdir -p ${FOLDER}
+if [ $? -ne 0 ]
+then
+    echo "Error: Cannot create gpx share folder: ${FOLDER}"
+    exit 10
+fi
+
+checkUpgrade=0
+if [ -f "${FOLDER}/lastChecked" ]
+then
+    lastDate=$(cat "${FOLDER}/lastChecked")
+    thisDate=$(date +%W)
+
+    if [ $lastDate != $thisDate ]
+    then
+        echo $thisDate >"${FOLDER}/lastChecked"
+        checkUpgrade=1
+    fi
+else
+    checkUpgrade=1
+    thisDate=$(date +%W)
+    echo $thisDate >"${FOLDER}/lastChecked"
+fi
+
+if [ $checkUpgrade -eq 1 ]
+then
+    if [ ! -f "${FOLDER}/version" ]
+    then
+        localRelease="0"
+    else
+        localRelease=$(cat "${FOLDER}/version")
+    fi
+
+    latestRelease="$(curl -sL https://raw.githubusercontent.com/zemiak/gpx/master/RELEASE)"
+    if [ $? -eq 0 ]
+    then
+        if [ "${localRelease}" != "${latestRelease}" ]
+        then
+            rm -f "${FOLDER}/gpx.jar"
+            curl -sL "https://github.com/zemiak/gpx/releases/download/v${latestRelease}/gpx.jar" -o "/tmp/gpx.jar"
+            if [ $? -ne 0 ]
+            then
+                echo "Warning: Could not download the ${latestRelease} release, keeping old ${localRelease}"
+            else
+                mv /tmp/gpx.jar "${FOLDER}/"
+                echo "${latestRelease}" >"${FOLDER}/version"
+            fi
+        fi
+    fi
+fi
+
+java -jar ${FOLDER}/gpx.jar $@
