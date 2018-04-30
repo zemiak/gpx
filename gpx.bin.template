@@ -1,0 +1,31 @@
+#!/bin/bash
+
+whichExit()
+{
+    which $1 >/dev/null
+    if [ $? -ne 0 ]
+    then
+        echo "Error: cannot find $1"
+        exit 1
+    fi
+}
+
+whichExit java
+whichExit tail
+whichExit cut
+whichExit grep
+
+FOLDER="${HOME}/.gpx"
+mkdir -p ${FOLDER}
+if [ $? -ne 0 ]
+then
+    echo "Error: Cannot create gpx share folder: ${FOLDER}"
+    exit 10
+fi
+
+match=$(grep --text --line-number '^PAYLOAD:$' $0 | cut -d ':' -f 1)
+payload_start=$((match + 1))
+tail -n +$payload_start $0 >~/.gpx/gpx.jar
+
+java -jar "${FOLDER}/gpx.jar" $@
+exit $?
