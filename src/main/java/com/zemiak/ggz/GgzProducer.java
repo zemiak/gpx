@@ -7,11 +7,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.w3c.dom.Node;
 
 public class GgzProducer {
+    private static final Logger LOG = Logger.getLogger(GgzProducer.class.getName());
+
     FileOutputStream fos;
     ZipOutputStream zos;
     String zipFileName;
@@ -37,7 +41,6 @@ public class GgzProducer {
 
         ZipEntry ze = new ZipEntry("index/com/garmin/geocaches/v0/index.xml");
 
-
         try {
             zos.putNextEntry(ze);
             zos.write(GgzWriter.getXml(indexEntries).getBytes());
@@ -45,6 +48,8 @@ public class GgzProducer {
         } catch (IOException ex) {
             throw new RuntimeException("Cannot add an index " + ze.getName() + " into ZIP", ex);
         }
+
+        LOG.log(Level.FINE, "Wrote {0} index entries into index file.", indexEntries.size());
     }
 
     public void close() throws IOException {

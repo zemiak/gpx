@@ -4,11 +4,15 @@ import com.zemiak.xml.Printer;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.w3c.dom.Node;
 
 public class GpxFile {
+    private static final Logger LOG = Logger.getLogger(GpxFile.class.getName());
+
     private final String fileName;
     private final ZipOutputStream zos;
     private String header;
@@ -44,6 +48,8 @@ public class GpxFile {
         zos.putNextEntry(ze);
         zos.write(text.toString().getBytes());
         zos.closeEntry();
+
+        LOG.log(Level.FINE, "Wrote data file {0}.gpx into index file.", fileName);
     }
 
     private String endGpxFile() {

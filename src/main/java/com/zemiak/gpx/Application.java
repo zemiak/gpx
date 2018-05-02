@@ -6,6 +6,8 @@ import com.zemiak.xml.NodeFinder;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -16,9 +18,12 @@ import org.xml.sax.SAXException;
 
 public class Application
 {
+    private static final Logger LOG = Logger.getLogger(Application.class.getName());
     private static final DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
 
     public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException {
+        long start = System.currentTimeMillis();
+
         if (args.length == 0) {
             usage("No arguments provided");
         }
@@ -59,6 +64,8 @@ public class Application
             wptNodes.forEach(node -> GpxStore.add(fileName, node));
         }
 
+        LOG.log(Level.INFO, "Found {0} unique caches in {1} files.", new Object[]{GpxStore.getAll().keySet().size(), files.length});
+
         if (GpxStore.isEmpty()) {
             emptyResult();
         }
@@ -67,7 +74,7 @@ public class Application
         ggzProducer.process(GpxStore.getAll());
         ggzProducer.close();
 
-        System.out.println("Result: " + ggzProducer.getZipFileName());
+        LOG.log(Level.INFO, "Finished in {0} milliseconds, result is in {1}.", new Object[]{System.currentTimeMillis() - start, ggzProducer.getZipFileName()});
     }
 
     private static void usage(String reason) {
