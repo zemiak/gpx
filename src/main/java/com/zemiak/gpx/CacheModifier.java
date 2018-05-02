@@ -5,17 +5,7 @@ import org.w3c.dom.Node;
 
 public class CacheModifier {
     public static void modifyCache(Node cache, String attrs, String hint) {
-        modifyDescription(cache, attrs, hint);
         modifyHint(cache, attrs, hint);
-    }
-
-    private static void modifyDescription(Node cache, String attrs, String hint) {
-        Node desc = NodeFinder.findNode(cache.getChildNodes(), "groundspeak:long_description");
-        desc.getFirstChild().setNodeValue(attrs.replace("\n", "<p>&nbsp;.</p>")
-                + "<p>&nbsp;.</p><p>&nbsp;.</p>"
-                + hint
-                + "<p>&nbsp;.</p><p>&nbsp;.</p>"
-                + desc.getFirstChild().getNodeValue());
     }
 
     private static void modifyHint(Node cache, String attrs, String hint) {
