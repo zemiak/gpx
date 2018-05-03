@@ -1,5 +1,6 @@
 package com.zemiak.ggz;
 
+import com.zemiak.MessagePrinter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,15 +8,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.w3c.dom.Node;
 
 public class GgzProducer {
-    private static final Logger LOG = Logger.getLogger(GgzProducer.class.getName());
-
     FileOutputStream fos;
     ZipOutputStream zos;
     String zipFileName;
@@ -29,6 +26,7 @@ public class GgzProducer {
     public GgzProducer(String fileName) throws IOException {
         fos = new FileOutputStream(fileName);
         zos = new ZipOutputStream(fos);
+        zos.setLevel(9);
 
         this.zipFileName = fileName;
 
@@ -49,7 +47,7 @@ public class GgzProducer {
             throw new RuntimeException("Cannot add an index " + ze.getName() + " into ZIP", ex);
         }
 
-        LOG.log(Level.FINE, "Wrote {0} index entries into index file.", indexEntries.size());
+        MessagePrinter.println("Wrote %d index entries into index file.", indexEntries.size());
     }
 
     public void close() throws IOException {
