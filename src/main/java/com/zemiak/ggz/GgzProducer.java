@@ -81,6 +81,7 @@ public class GgzProducer {
             if (count >= 512) {
                 try {
                     gpxFile.flushFile(gpxEntries, box);
+                    gpxEntries.clear();
                 } catch (IOException ex) {
                     throw new RuntimeException("Cannot add an index data/" + fileName + "_" + suffix + ".gpx into ZIP", ex);
                 }
