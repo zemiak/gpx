@@ -97,9 +97,10 @@ public class GgzProducer {
             }
         }
 
-        if (! indexEntries.isEmpty()) {
+        if (! gpxEntries.isEmpty()) {
             try {
                 gpxFile.flushFile(gpxEntries, box);
+                gpxEntries.clear();
             } catch (IOException ex) {
                 throw new RuntimeException("Cannot add an index data/" + fileName + ".gpx into ZIP", ex);
             }
