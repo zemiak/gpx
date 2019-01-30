@@ -55,12 +55,16 @@ public class GgzProducer {
         fos.close();
     }
 
+    private String getSuffixPadded(int suffix) {
+        return String.format("%05d", suffix);
+    }
+
     private void process(String fileNameGiven, List<Node> gpx) {
         int i = 0, count = 0, suffix = 0;
 
         String fileNameWithExt = Paths.get(fileNameGiven).getFileName().toString();
         String fileName = fileNameWithExt.contains(".") ? fileNameWithExt.substring(0, fileNameWithExt.indexOf(".")) : fileNameWithExt;
-        GpxFile gpxFile = new GpxFile(fileName + "_" + suffix, zos);
+        GpxFile gpxFile = new GpxFile(fileName + "_" + getSuffixPadded(suffix), zos);
 
         int filePos = gpxFile.getHeaderLength();
         LatLonBox box = new LatLonBox();
@@ -89,7 +93,7 @@ public class GgzProducer {
                 suffix += 1;
                 box = new LatLonBox();
 
-                gpxFile = new GpxFile(fileName + "_" + suffix, zos);
+                gpxFile = new GpxFile(fileName + "_" + getSuffixPadded(suffix), zos);
                 filePos = gpxFile.getHeaderLength();
                 count = 0;
             } else {

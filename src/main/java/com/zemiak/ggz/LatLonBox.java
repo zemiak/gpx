@@ -59,6 +59,27 @@ public class LatLonBox {
     }
 
     private String updatePlaceholder(String header, String placeholder, double val) {
-        return header.replace(placeholder, "\"" + formatter.format(val).replace(",", ".") + "\"");
+        String numberWithoutTrailingZeros = cutTrailingZeros(formatter.format(val).replace(",", "."));
+        return header.replace(placeholder, "\"" + numberWithoutTrailingZeros + "\"");
+    }
+
+    private String cutTrailingZeros(String val) {
+        if (! val.contains(".")) return val;
+
+        while (true) {
+            if (val.length() < 2) break;
+            if (val.substring(val.length() - 1).equals(".")) {
+                val = val.substring(0, val.length() - 2);
+                break;
+            }
+
+            if (val.substring(val.length() - 1).equals("0")) {
+                val = val.substring(0, val.length() - 1);
+            } else {
+                break;
+            }
+        }
+        
+        return val;
     }
 }
